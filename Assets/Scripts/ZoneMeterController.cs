@@ -16,6 +16,7 @@ public class ZoneMeterController : MonoBehaviour
         for (int i = 0; i < sprites.transform.childCount; i++) {
             var sprite = sprites.transform.GetChild(i).gameObject;
             sprite.AddComponent<SpriteGlowEffect>();
+            sprite.GetComponent<SpriteGlowEffect>().GlowBrightness = 2.5f;
             sprite.GetComponent<SpriteGlowEffect>().GlowColor = Color.red;
         }
     }

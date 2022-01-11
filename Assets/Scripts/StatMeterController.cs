@@ -48,6 +48,7 @@ public class StatMeterController : MonoBehaviour
 
     private void ChangeGlow(GameObject tower, GameObject sprite) {
         sprite.AddComponent<SpriteGlowEffect>();
+        sprite.GetComponent<SpriteGlowEffect>().GlowBrightness = 2.5f;
         sprite.GetComponent<SpriteGlowEffect>().GlowColor = tower.GetComponent<SpriteGlowEffect>().GlowColor;
     }
 }
