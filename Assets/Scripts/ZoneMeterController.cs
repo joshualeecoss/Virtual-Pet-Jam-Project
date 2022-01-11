@@ -6,10 +6,17 @@ using SpriteGlow;
 public class ZoneMeterController : MonoBehaviour
 {
     private GameObject sprites;
+    
+    public GameObject statBar;
 
     private void Start() {
+        statBar = transform.Find("Bar/StatBar").gameObject;
         sprites = transform.Find("Sprites").gameObject;
         Glow(sprites);
+    }
+
+    private void Update() {
+        statBar.transform.localScale = new Vector2(statBar.transform.localScale.x, statBar.transform.localScale.y - 0.001f);
     }
 
     private void Glow(GameObject sprites) {
