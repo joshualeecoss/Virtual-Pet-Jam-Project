@@ -20,25 +20,25 @@ public class StatMeterController : MonoBehaviour
         sprites = transform.Find("Sprites").gameObject;
         
         if (type == meterType.Hunger) {
-            var tower = GameObject.Find("HungerTower");
+            var tower = GameObject.Find("HungerIcon");
             for (int i = 0; i < sprites.transform.childCount; i++) {
                 var sprite = sprites.transform.GetChild(i).gameObject;
                 ChangeGlow(tower, sprite);
             }
         } else if (type == meterType.Sleep) {
-            var tower = GameObject.Find("SleepTower");
+            var tower = GameObject.Find("SleepIcon");
             for (int i = 0; i < sprites.transform.childCount; i++) {
                 var sprite = sprites.transform.GetChild(i).gameObject;
                 ChangeGlow(tower, sprite);
             }
         } else if (type == meterType.Stamina) {
-            var tower = GameObject.Find("StaminaTower");
+            var tower = GameObject.Find("StaminaIcon");
             for (int i = 0; i < sprites.transform.childCount; i++) {
                 var sprite = sprites.transform.GetChild(i).gameObject;
                 ChangeGlow(tower, sprite);
             }
         } else if (type == meterType.Thirst) {
-            var tower = GameObject.Find("ThirstTower");
+            var tower = GameObject.Find("ThirstIcon");
             for (int i = 0; i < sprites.transform.childCount; i++) {
                 var sprite = sprites.transform.GetChild(i).gameObject;
                 ChangeGlow(tower, sprite);

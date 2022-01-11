@@ -9,6 +9,7 @@ public class TowerController : MonoBehaviour
     public float fireRate = 1f;
     public float damage = 1f;
     public float range = 10.0f;
+    public float price;
     public enum towerType {
         Hunger,
         Sleep,
@@ -29,6 +30,7 @@ public class TowerController : MonoBehaviour
     private void Start() {
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
+        price = 1f;
 
         state = STATE.Idle;
     }
@@ -45,11 +47,8 @@ public class TowerController : MonoBehaviour
         animator.SetBool("isIdle", true);
     }
 
-    void OnDrawGizmos()
-    {
-        // Draw a yellow sphere at the transform's position
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, range);
+    public float GetPrice() {
+        return price;
     }
 
 }
