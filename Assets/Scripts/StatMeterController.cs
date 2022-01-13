@@ -5,6 +5,8 @@ using SpriteGlow;
 
 public class StatMeterController : MonoBehaviour
 {
+    public const float DECAY_RATE = 0.0005f;
+    public const float FULL_TIMEOUT = 5.0f;
     public enum meterType {
         Hunger,
         Sleep,
@@ -13,15 +15,15 @@ public class StatMeterController : MonoBehaviour
     }
 
     public enum STATE {
+        Full,
         Decreasing,
         Stopped
     }
 
-    private STATE state;
+    public STATE state;
 
-    public const float DECAY_RATE = 0.0005f;
 
-    public float maxValue, currentValue;
+    public float maxValue, currentValue, zoneThreshold;
     public GameObject statBar;
 
     public meterType type;
@@ -60,12 +62,16 @@ public class StatMeterController : MonoBehaviour
 
         maxValue = statBar.transform.localScale.y;
         currentValue = maxValue;
+        zoneThreshold = maxValue * 0.75f;
 
-        state = STATE.Decreasing;
+        state = STATE.Full;
     }
 
-    private void Update() {
+    private void FixedUpdate() {
         switch (state) {
+            case STATE.Full:
+                HandleFull();
+                break;
             case STATE.Decreasing:
                 HandleDecreasing();
                 break;
@@ -75,8 +81,12 @@ public class StatMeterController : MonoBehaviour
         }  
     }
 
+    private void HandleFull() {
+        StartCoroutine(FullTimeout());
+    }
+
     private void HandleDecreasing() {
-        if (currentValue > 0) {
+        if (currentValue >= 0) {
             currentValue -= DECAY_RATE;
             statBar.transform.localScale = new Vector2(statBar.transform.localScale.x, currentValue);
         } else {
@@ -93,4 +103,26 @@ public class StatMeterController : MonoBehaviour
         sprite.GetComponent<SpriteGlowEffect>().GlowBrightness = 2.5f;
         sprite.GetComponent<SpriteGlowEffect>().GlowColor = tower.GetComponent<SpriteGlowEffect>().GlowColor;
     }
+
+    private IEnumerator FullTimeout() {
+        yield return new WaitForSeconds(FULL_TIMEOUT);
+        state = STATE.Decreasing;
+    }
+
+    public float GetCurrentValue() {
+        return currentValue;
+    }
+
+    public float GetMaxValue() {
+        return maxValue;
+    }
+
+    public void Fill() {
+        currentValue = maxValue;
+    }
+
+    public float GetThreshold() {
+        return zoneThreshold;
+    }
+
 }
