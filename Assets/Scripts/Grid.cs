@@ -40,7 +40,7 @@ public class Grid<TGridObject>
             for (int i = 0; i < gridArray.GetLength(0); i++) {
 
                 for (int j = 0; j < gridArray.GetLength(1); j++) {
-                    //debugTextArray[i, j] = UtilsClass.CreateWorldText(gridArray[i, j]?.ToString(), null, GetWorldPosition(i, j) + new Vector3(cellSize, cellSize) * 0.5f, 80, Color.white, TextAnchor.MiddleCenter);
+                    debugTextArray[i, j] = UtilsClass.CreateWorldText(i + ", " + j, null, GetWorldPosition(i, j) + new Vector3(cellSize, cellSize) * 0.5f, 80, Color.white, TextAnchor.MiddleCenter);
                     Debug.DrawLine(GetWorldPosition(i, j), GetWorldPosition(i, j + 1), Color.white, 100f);
                     Debug.DrawLine(GetWorldPosition(i, j), GetWorldPosition(i + 1, j), Color.white, 100f);
                 }
@@ -96,5 +96,13 @@ public class Grid<TGridObject>
 
     public float GetCellSize() {
         return cellSize;
+    }
+
+    public float GetWidth() {
+        return width;
+    }
+
+    public float GetHeight() {
+        return height;
     }
 }

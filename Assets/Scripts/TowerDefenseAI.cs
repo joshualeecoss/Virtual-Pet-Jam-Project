@@ -68,11 +68,13 @@ public class TowerDefenseAI : MonoBehaviour
         private Grid<GridNode> grid;
         private int x;
         private int y;
+        private bool empty;
 
-        public GridNode(Grid<GridNode> grid, int x, int y) {
+        public GridNode(Grid<GridNode> grid, int x, int y, bool empty = true) {
             this.grid = grid;
             this.x = x;
             this.y = y;
+            this.empty = empty;
 
             Vector3 worldPos00 = grid.GetWorldPosition(x, y);
             Vector3 worldPos10 = grid.GetWorldPosition(x + 1, y);

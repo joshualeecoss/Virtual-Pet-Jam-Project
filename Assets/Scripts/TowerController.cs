@@ -91,4 +91,8 @@ public class TowerController : MonoBehaviour
         UpgradeOverlay.Show_Static(this);
     }
 
+    public void SetType(towerType type) {
+        this.type = type;
+    }
+
 }
