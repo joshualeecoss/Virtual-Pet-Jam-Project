@@ -16,10 +16,6 @@ public class GameManager : MonoBehaviour
 
     private ZoneMeterController zoneMeter;
 
-    public GameObject hungerTower;
-
-
-
     private TextMeshProUGUI cashText;
     private TextMeshProUGUI hungerPrice, sleepPrice, staminaPrice, thirstPrice;
     private TextMeshProUGUI foodPrice, pillowPrice, coffeePrice, waterPrice;

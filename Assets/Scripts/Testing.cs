@@ -5,19 +5,16 @@ using CodeMonkey.Utils;
 
 public class Testing : MonoBehaviour
 {
-    private Grid grid;
+    private Grid<bool> grid;
     private void Start() {
-        grid = new Grid(8, 11, 24f, new Vector3(264, 22));
+        grid = new Grid<bool>(8, 11, 24f, new Vector3(262, 24), (Grid<bool> grid, int x, int y) => true);
     }
 
     private void Update() {
         if (Input.GetMouseButtonDown(0)) {
-            grid.SetValue(UtilsClass.GetMouseWorldPosition(), 56);
-        }
-
-        if (Input.GetMouseButtonDown(1)) {
-            Debug.Log(grid.GetValue(UtilsClass.GetMouseWorldPosition()));
+            Vector3 position = UtilsClass.GetMouseWorldPosition();
         }
     }
+
     
 }
