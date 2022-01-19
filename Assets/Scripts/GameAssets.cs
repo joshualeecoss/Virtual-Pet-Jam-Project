@@ -18,5 +18,6 @@ public class GameAssets : MonoBehaviour
     public Transform towerPrefab;
     public Transform enemyPrefab;
     public Transform healthBarPrefab;
+    public Texture2D gridTexture;
 
 }

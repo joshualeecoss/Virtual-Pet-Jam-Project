@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
@@ -7,8 +8,14 @@ using CodeMonkey.Utils;
 
 public class GameManager : MonoBehaviour
 {
+
     private float cash;
     private const float PRICE_INCREASE = 1.0f;
+    private const int GRID_WIDTH = 8;
+    private const int GRID_HEIGHT = 11;
+    private const float TOWER_PRICE = 10f;
+    private bool loaded;
+    private float gridCellSize = 24f;
 
     private Grid<GridNode> grid;
 
@@ -27,7 +34,8 @@ public class GameManager : MonoBehaviour
     private float foodPriceValue = 1f, pillowPriceValue = 1f, coffeePriceValue = 1f, waterPriceValue = 1f;
 
     private void Awake() {
-        grid = new Grid<GridNode>(8, 11, 24f, new Vector3(262, 24), (Grid<GridNode> g, int x, int y) => new GridNode(g, x, y));
+        grid = new Grid<GridNode>(8, 11, gridCellSize, new Vector3(262, 24), (Grid<GridNode> g, int x, int y) => new GridNode(g, x, y));
+        
     }
 
     private void Start() {
@@ -47,7 +55,7 @@ public class GameManager : MonoBehaviour
         thirstMeter = GameObject.Find("Meters/ThirstMeter").GetComponent<StatMeterController>();
         zoneMeter = GameObject.Find("Meters/TheZoneMeter").GetComponent<ZoneMeterController>();
 
-        
+        loaded = false;
         cash = 500f;
         SetText();
     }
@@ -61,9 +69,25 @@ public class GameManager : MonoBehaviour
             Debug.Log("B");
         }
 
-        if (Input.GetMouseButtonDown(1)) {
-            SpawnTower();
+        if (Input.GetMouseButtonDown(0)) {
+            GridNode node = grid.GetGridObject(UtilsClass.GetMouseWorldPosition());
+            if (node != null && loaded == true) {
+                if (node.isItEmpty() == false) {
+                    return;
+                } else {
+                    SpawnTower();
+                    node.SetIsEmpty(true);
+                    loaded = false;
+                }
+            } 
         }
+
+        // TextMesh[,] debugTextArray = new TextMesh[GRID_WIDTH, GRID_HEIGHT];
+        // for (int i = 0; i < GRID_WIDTH; i++) {
+        //     for (int j = 0; j < GRID_HEIGHT; j++) {
+        //         debugTextArray[i, j] = UtilsClass.CreateWorldText(grid.GetGridObject(i, j).isItWalkable().ToString(), null, grid.GetWorldPosition(i, j) + new Vector3(gridCellSize, gridCellSize) * 0.5f, 80, Color.white, TextAnchor.MiddleCenter);
+        //     }
+        // }
     }
 
     private void ZoneCheck() {
@@ -141,17 +165,30 @@ public class GameManager : MonoBehaviour
         ReadyTower(TowerController.towerType.Thirst);
     }
 
+
     private void ReadyTower(TowerController.towerType type) {
         tower = GameAssets.i.towerPrefab;
         tower.GetComponent<TowerController>().SetType(type);
+        loaded = true;
     }
 
     private void SpawnTower() {
         if (tower != null) {
+            if (tower.GetComponent<TowerController>().GetTowerType() == TowerController.towerType.Hunger) {
+                hungerMeter.IncreaseDecayRate();
+            } else if (tower.GetComponent<TowerController>().GetTowerType() == TowerController.towerType.Sleep) {
+                sleepMeter.IncreaseDecayRate();
+            } else if (tower.GetComponent<TowerController>().GetTowerType() == TowerController.towerType.Stamina) {
+                staminaMeter.IncreaseDecayRate();
+            } else if (tower.GetComponent<TowerController>().GetTowerType() == TowerController.towerType.Thirst) {
+                thirstMeter.IncreaseDecayRate();
+            } 
+
             Vector3 spawnPosition = UtilsClass.GetMouseWorldPosition();
             spawnPosition = ValidateWorldGridPosition(spawnPosition);
             spawnPosition += new Vector3(1, 1, 0) * grid.GetCellSize() * .5f;
-            Instantiate(tower, spawnPosition, Quaternion.identity);   
+            Instantiate(tower, spawnPosition, Quaternion.identity);  
+            cash -= TOWER_PRICE; 
             tower = null;  
         }
  
@@ -175,16 +212,17 @@ public class GameManager : MonoBehaviour
         FunctionTimer.Create(() => SpawnEnemy(), spawnTime); spawnTime += timePerSpawn;
     }
     private void SpawnEnemy() {
-        Vector3 spawnPosition = new Vector3(461f, 178f);
+        Vector3 spawnPosition = ValidateWorldGridPosition(new Vector3(461f, 178f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f;
         List<Vector3> waypointPositionList = new List<Vector3> {
-            new Vector3(375f, 178f),
-            new Vector3(375f, 120f),
-            new Vector3(300f, 120f),
-            new Vector3(300f, 178f),
+            ValidateWorldGridPosition(new Vector3(375f, 178f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(375f, 120f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(300f, 120f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(300f, 178f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
         };
 
         Enemy enemy = Enemy.Create(spawnPosition);
         enemy.SetPathVectorList(waypointPositionList);
     }
+
 
 }

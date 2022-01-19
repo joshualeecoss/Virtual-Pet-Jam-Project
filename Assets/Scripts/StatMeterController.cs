@@ -5,7 +5,7 @@ using SpriteGlow;
 
 public class StatMeterController : MonoBehaviour
 {
-    public const float DECAY_RATE = 0.0005f;
+    private const float DECAY_RATE = 0.00005f;
     public const float FULL_TIMEOUT = 5.0f;
     public enum meterType {
         Hunger,
@@ -21,6 +21,7 @@ public class StatMeterController : MonoBehaviour
     }
 
     public STATE state;
+    private float decayRate;
 
 
     public float maxValue, currentValue, zoneThreshold;
@@ -60,6 +61,8 @@ public class StatMeterController : MonoBehaviour
             }
         }
 
+        decayRate = 0f;
+
         maxValue = statBar.transform.localScale.y;
         currentValue = maxValue;
         zoneThreshold = maxValue * 0.75f;
@@ -86,9 +89,11 @@ public class StatMeterController : MonoBehaviour
     }
 
     private void HandleDecreasing() {
-        if (currentValue >= 0) {
-            currentValue -= DECAY_RATE;
+        if (currentValue > 0) {
+            currentValue -= decayRate;
             statBar.transform.localScale = new Vector2(statBar.transform.localScale.x, currentValue);
+        } else if (currentValue <= 0) {
+            currentValue = 0;
         } else {
             state = STATE.Stopped;
         }
@@ -123,6 +128,10 @@ public class StatMeterController : MonoBehaviour
 
     public float GetThreshold() {
         return zoneThreshold;
+    }
+
+    public void IncreaseDecayRate() {
+        decayRate += DECAY_RATE;
     }
 
 }

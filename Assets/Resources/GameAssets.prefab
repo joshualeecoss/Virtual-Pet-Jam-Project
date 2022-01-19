@@ -47,3 +47,4 @@ MonoBehaviour:
   towerPrefab: {fileID: 8043063967695907101, guid: 62bb7d88552fa4f4c94cfec6a7e2843b, type: 3}
   enemyPrefab: {fileID: 8010197751670635832, guid: 19e8ccbefefcd8040a2e6cf5d7356742, type: 3}
   healthBarPrefab: {fileID: 4968856179738067908, guid: 626d38bd876363b44b20764240916e69, type: 3}
+  gridTexture: {fileID: 10916, guid: 0000000000000000f000000000000000, type: 0}

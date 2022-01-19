@@ -69,7 +69,7 @@ public class Pathfinding {
                 if (closedList.Contains(neighbourNode)) {
                     continue;
                 }
-                if (!neighbourNode.isWalkable) {
+                if (neighbourNode.isEmpty) {
                     closedList.Add(neighbourNode);
                     continue;
                 }
