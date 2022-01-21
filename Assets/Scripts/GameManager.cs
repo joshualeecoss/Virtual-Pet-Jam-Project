@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour
 
     private ZoneMeterController zoneMeter;
     private Transform tower;
+    private List<Transform> towerList;
 
     private TextMeshProUGUI cashText;
     private TextMeshProUGUI hungerPrice, sleepPrice, staminaPrice, thirstPrice;
@@ -35,7 +36,7 @@ public class GameManager : MonoBehaviour
 
     private void Awake() {
         grid = new Grid<GridNode>(8, 11, gridCellSize, new Vector3(262, 24), (Grid<GridNode> g, int x, int y) => new GridNode(g, x, y));
-        
+        towerList = new List<Transform>();
     }
 
     private void Start() {
@@ -58,11 +59,13 @@ public class GameManager : MonoBehaviour
         loaded = false;
         cash = 500f;
         SetText();
+        BlackOutPath();
     }
 
     private void Update() {
         SetText();
         ZoneCheck();
+        ZonePower();
 
         if (Input.GetKeyDown(KeyCode.B)) {
             SpawnEnemyWave_1();
@@ -76,7 +79,7 @@ public class GameManager : MonoBehaviour
                     return;
                 } else {
                     SpawnTower();
-                    node.SetIsEmpty(true);
+                    node.SetIsEmpty(false);
                     loaded = false;
                 }
             } 
@@ -99,6 +102,21 @@ public class GameManager : MonoBehaviour
             } else {
                 zoneMeter.Decrease();
             }
+    }
+
+    private void ZonePower() {
+        if (zoneMeter.GetCurrentValue() >= zoneMeter.GetThresholdValue()) {
+            foreach (Transform tower in towerList) {
+                tower.GetComponent<TowerController>().ZoneDamage();
+                tower.GetComponent<Animator>().speed = 1.5f;
+            }
+        } else {
+            foreach (Transform tower in towerList) {
+                tower.GetComponent<TowerController>().RegularDamage();
+                tower.GetComponent<Animator>().speed = 0.8f;
+            }
+        }
+    
     }
 
     private void SetText() {
@@ -187,7 +205,8 @@ public class GameManager : MonoBehaviour
             Vector3 spawnPosition = UtilsClass.GetMouseWorldPosition();
             spawnPosition = ValidateWorldGridPosition(spawnPosition);
             spawnPosition += new Vector3(1, 1, 0) * grid.GetCellSize() * .5f;
-            Instantiate(tower, spawnPosition, Quaternion.identity);  
+            Transform newTower = Instantiate(tower, spawnPosition, Quaternion.identity);  
+            towerList.Add(newTower);
             cash -= TOWER_PRICE; 
             tower = null;  
         }
@@ -212,16 +231,76 @@ public class GameManager : MonoBehaviour
         FunctionTimer.Create(() => SpawnEnemy(), spawnTime); spawnTime += timePerSpawn;
     }
     private void SpawnEnemy() {
-        Vector3 spawnPosition = ValidateWorldGridPosition(new Vector3(461f, 178f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f;
-        List<Vector3> waypointPositionList = new List<Vector3> {
-            ValidateWorldGridPosition(new Vector3(375f, 178f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
-            ValidateWorldGridPosition(new Vector3(375f, 120f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
-            ValidateWorldGridPosition(new Vector3(300f, 120f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
-            ValidateWorldGridPosition(new Vector3(300f, 178f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
-        };
+        Vector3 spawnPosition = ValidateWorldGridPosition(new Vector3(465f, 252f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f;
+        List<Vector3> waypointPositionList = WaypointPositions();
 
         Enemy enemy = Enemy.Create(spawnPosition);
         enemy.SetPathVectorList(waypointPositionList);
+    }
+
+    private List<Vector3> WaypointPositions() {
+        List<Vector3> positionList = new List<Vector3>() { 
+            ValidateWorldGridPosition(new Vector3(418f, 252f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(418f, 60f))  + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(298f, 60f))  + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(298f, 108f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(370f, 108f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(370f, 252f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(322f, 252f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(322f, 156f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(274f, 156f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(274f, 228f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(235f, 228f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f
+        };
+
+        return positionList;
+    }
+
+    private void BlackOutPath() {
+        List<Vector3> nodes = new List<Vector3>() {
+            ValidateWorldGridPosition(new Vector3(441f, 252f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(418f, 252f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(418f, 228f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(418f, 204f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(418f, 180f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(418f, 156f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(418f, 132f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(418f, 108f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(418f, 84f))  + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(418f, 60f))  + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(394f, 60f))  + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(370f, 60f))  + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(346f, 60f))  + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(322f, 60f))  + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(298f, 60f))  + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(298f, 84f))  + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(298f, 108f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(322f, 108f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(346f, 108f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(370f, 108f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(370f, 132f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(370f, 156f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(370f, 180f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(370f, 204f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(370f, 228f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(370f, 252f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(346f, 252f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(322f, 252f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(322f, 228f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(322f, 204f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(322f, 180f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(322f, 156f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(298f, 156f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(274f, 156f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(274f, 180f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(274f, 204f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+            ValidateWorldGridPosition(new Vector3(274f, 228f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f,
+        };
+
+        foreach (Vector3 node in nodes) {
+            grid.GetGridObject(node).SetIsEmpty(false);
+        }
+
     }
 
 

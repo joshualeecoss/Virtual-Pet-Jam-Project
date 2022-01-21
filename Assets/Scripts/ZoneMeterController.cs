@@ -5,8 +5,8 @@ using SpriteGlow;
 
 public class ZoneMeterController : MonoBehaviour
 {
-    public const float INCREASE_RATE = 0.00005f;
-    public const float DECAY_RATE = 0.00005f;
+    private const float INCREASE_RATE = 0.0001f;
+    private const float DECAY_RATE = 0.00005f;
     private GameObject sprites;
     public GameObject statBar;
 
@@ -16,7 +16,7 @@ public class ZoneMeterController : MonoBehaviour
         Stopped
     }
     public STATE state;
-    public float maxValue, currentValue;
+    public float maxValue, currentValue, thresholdValue;
 
     private void Start() {
         statBar = transform.Find("Bar/StatBar").gameObject;
@@ -25,6 +25,7 @@ public class ZoneMeterController : MonoBehaviour
 
         maxValue = statBar.transform.localScale.y;
         currentValue = 0.0f;
+        thresholdValue = maxValue * 0.75f;
         statBar.transform.localScale = new Vector2(statBar.transform.localScale.x, currentValue);
 
         state = STATE.Increasing;
@@ -56,7 +57,7 @@ public class ZoneMeterController : MonoBehaviour
     private void HandleIncreasing() {
         if (currentValue <= maxValue) {
             currentValue += INCREASE_RATE;
-            statBar.transform.localScale = new Vector2(statBar.transform.localScale.x, statBar.transform.localScale.y + DECAY_RATE);
+            statBar.transform.localScale = new Vector2(statBar.transform.localScale.x, statBar.transform.localScale.y + INCREASE_RATE);
         } else {
             state = STATE.Stopped;
         }
@@ -81,5 +82,13 @@ public class ZoneMeterController : MonoBehaviour
 
     public void Decrease() {
         state = STATE.Decreasing;
+    }
+
+    public float GetCurrentValue() {
+        return currentValue;
+    }
+
+    public float GetThresholdValue() {
+        return thresholdValue;
     }
 }

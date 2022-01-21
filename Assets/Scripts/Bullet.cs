@@ -7,7 +7,7 @@ public class Bullet : MonoBehaviour
 {
     private const float BULLET_SPEED = 60f;
     
-    public static void Create(Vector3 spawnPosition, Enemy enemy, int damageAmount) {
+    public static void Create(Vector3 spawnPosition, Enemy enemy, float damageAmount) {
         Transform bulletTransform = Instantiate(GameAssets.i.bulletPrefab, spawnPosition, Quaternion.identity);
 
         Bullet bullet = bulletTransform.GetComponent<Bullet>();
@@ -15,9 +15,9 @@ public class Bullet : MonoBehaviour
     }
 
     private Enemy enemy;
-    private int damageAmount;
+    private float damageAmount;
 
-    private void Setup(Enemy enemy, int damageAmount) {
+    private void Setup(Enemy enemy, float damageAmount) {
         this.enemy = enemy;
         this.damageAmount = damageAmount;
     }

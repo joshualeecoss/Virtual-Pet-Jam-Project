@@ -99,7 +99,7 @@ public class Enemy : MonoBehaviour
         state = State.Attacking;
     }
 
-    public void Damage(int damageAmount) {
+    public void Damage(float damageAmount) {
         healthSystem.Damage(damageAmount);
         if (IsDead()) {
             Destroy(gameObject);

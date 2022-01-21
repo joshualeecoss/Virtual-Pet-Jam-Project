@@ -6,14 +6,14 @@ using System;
 public class HealthSystem {
 
     public event EventHandler OnHealthChanged;
-    private int health;
-    private int healthMax;
-    public HealthSystem(int healthMax) {
+    private float health;
+    private float healthMax;
+    public HealthSystem(float healthMax) {
         this.healthMax = healthMax;
         health = healthMax;
     }
 
-    public int GetHealth() {
+    public float GetHealth() {
         return health;
     }
 
@@ -22,10 +22,10 @@ public class HealthSystem {
     }
 
     public float GetHealthPercent() {
-        return (float)health / healthMax;
+        return health / healthMax;
     }
 
-    public void Damage(int damageAmount) {
+    public void Damage(float damageAmount) {
         health -= damageAmount;
         if (health < 0) {
             health = 0;
@@ -35,7 +35,7 @@ public class HealthSystem {
         }
     }
 
-    public void Heal(int healAmount) {
+    public void Heal(float healAmount) {
         health += healAmount;
         if (health > healthMax) health = healthMax;
         if (OnHealthChanged != null) OnHealthChanged(this, EventArgs.Empty);

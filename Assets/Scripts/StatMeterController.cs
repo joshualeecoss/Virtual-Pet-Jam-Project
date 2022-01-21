@@ -89,12 +89,10 @@ public class StatMeterController : MonoBehaviour
     }
 
     private void HandleDecreasing() {
-        if (currentValue > 0) {
+        if (currentValue >= 0) {
             currentValue -= decayRate;
             statBar.transform.localScale = new Vector2(statBar.transform.localScale.x, currentValue);
-        } else if (currentValue <= 0) {
-            currentValue = 0;
-        } else {
+        }  else {
             state = STATE.Stopped;
         }
     }

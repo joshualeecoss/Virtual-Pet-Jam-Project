@@ -17,7 +17,13 @@ public class TowerController : MonoBehaviour
 
     private Vector3 projectileShootFromPosition;
     public float range;
-    private int damageAmount;
+    private float damage;
+    private const float REGULAR_DAMAGE_AMOUNT = 25f;
+    private const float ZONE_DAMAGE_AMOUNT = REGULAR_DAMAGE_AMOUNT * 1.5f;
+    private const float REGULAR_RANGE = 60f;
+    private const float ZONE_RANGE = REGULAR_RANGE * 1.5f;
+    private const float REGULAR_SHOOT_TIMER_MAX = 0.5f;
+    private const float ZONE_SHOOT_TIMER_MAX = 0.3f;
     private float shootTimerMax;
     private float shootTimer;
     private Animator animator;
@@ -26,9 +32,7 @@ public class TowerController : MonoBehaviour
 
     private void Awake() {
         projectileShootFromPosition = transform.Find("ProjectileShootFromPosition").position;
-        range = 60f;
-        damageAmount = 25;
-        shootTimerMax = .4f;
+        RegularDamage();
         animator = GetComponent<Animator>();
         glowEffect = GetComponent<SpriteGlowEffect>();
 
@@ -60,7 +64,7 @@ public class TowerController : MonoBehaviour
             Enemy enemy = GetClosestEnemy();
             if (enemy != null) {
                 // Enemy in range!
-                Bullet.Create(projectileShootFromPosition, enemy, damageAmount);
+                Bullet.Create(projectileShootFromPosition, enemy, damage);
             }        
         }
         
@@ -79,17 +83,17 @@ public class TowerController : MonoBehaviour
         glowEffect.GlowColor = tower.GetComponent<SpriteGlowEffect>().GlowColor;
     }
 
-    public void UpgradeRange() {
-        range += 10;
-    }
+    // public void UpgradeRange() {
+    //     range += 10;
+    // }
 
-    public void UpgradeDamageAmount() {
-        damageAmount += 5;
-    }
+    // public void UpgradeDamageAmount() {
+    //     damageAmount += 5;
+    // }
 
-    private void OnMouseEnter() {
-        UpgradeOverlay.Show_Static(this);
-    }
+    // private void OnMouseEnter() {
+    //     UpgradeOverlay.Show_Static(this);
+    // }
 
     public towerType GetTowerType() {
         return type;
@@ -97,6 +101,18 @@ public class TowerController : MonoBehaviour
 
     public void SetType(towerType type) {
         this.type = type;
+    }
+
+    public void RegularDamage() {
+        damage = REGULAR_DAMAGE_AMOUNT;
+        range = REGULAR_RANGE;
+        shootTimerMax = REGULAR_SHOOT_TIMER_MAX;
+    }
+
+    public void ZoneDamage() {
+        damage = ZONE_DAMAGE_AMOUNT;
+        range = ZONE_RANGE;
+        shootTimerMax = ZONE_SHOOT_TIMER_MAX;
     }
 
 }

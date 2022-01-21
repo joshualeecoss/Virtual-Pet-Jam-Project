@@ -41,6 +41,11 @@ public class GridNode {
         mySprite = Sprite.Create(texture, new Rect(0,0,1,1), new Vector2(0.5f, 0.5f));
         gameObject.transform.position = worldPos00 + new Vector3(24, 24) * 0.5f;
         gameObject.transform.localScale = new Vector3(2000f, 2000f, 1f);
+        if (isEmpty) {
+            sr.color = new Color(1f, 1f, 1f, 0.5f);
+        } else {
+            sr.color = Color.black;
+        }
         
         
         sr.sprite = mySprite;
@@ -57,5 +62,7 @@ public class GridNode {
 
     public void SetIsEmpty(bool isEmpty) {
         this.isEmpty = isEmpty;
+        if (isEmpty == false)
+            sr.color = Color.black;
     }
 }
