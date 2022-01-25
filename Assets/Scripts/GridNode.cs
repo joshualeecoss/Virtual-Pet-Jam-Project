@@ -44,7 +44,7 @@ public class GridNode {
         if (isEmpty) {
             sr.color = new Color(1f, 1f, 1f, 0.5f);
         } else {
-            sr.color = Color.black;
+            sr.color = new Color(0f, 0f, 0f, 0f);
         }
         
         
@@ -62,7 +62,8 @@ public class GridNode {
 
     public void SetIsEmpty(bool isEmpty) {
         this.isEmpty = isEmpty;
-        if (isEmpty == false)
-            sr.color = Color.black;
+        if (isEmpty == false) {
+            sr.color = new Color(0f, 0f, 0f, 0f);
+        }
     }
 }

@@ -24,7 +24,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 320126101534740791}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.0452, y: -0.0218, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 8043063967695907101}
@@ -172,6 +172,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   range: 0
   type: 0
+  shootSound: {fileID: 8300000, guid: 817a50f63fc52854ab8e24acb8e408bd, type: 3}
 --- !u!95 &4163988193506644331
 Animator:
   serializedVersion: 3

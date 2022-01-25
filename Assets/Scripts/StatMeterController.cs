@@ -93,7 +93,7 @@ public class StatMeterController : MonoBehaviour
             currentValue -= decayRate;
             statBar.transform.localScale = new Vector2(statBar.transform.localScale.x, currentValue);
         }  else {
-            state = STATE.Stopped;
+            currentValue = 0;
         }
     }
 

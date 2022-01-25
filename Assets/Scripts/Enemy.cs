@@ -16,13 +16,15 @@ public class Enemy : MonoBehaviour
     public static Enemy GetClosestEnemy(Vector3 position, float maxRange) {
         Enemy closest = null;
         foreach (Enemy enemy in enemyList) {
-            if (enemy.IsDead()) continue;
-            if (Vector3.Distance(position, enemy.GetPosition()) <= maxRange) {
-                if (closest == null) {
-                    closest = enemy;
-                } else {
-                    if (Vector3.Distance(position, enemy.GetPosition()) < Vector3.Distance(position, closest.GetPosition())) {
+            if (enemy != null) {
+                if (enemy.IsDead()) continue;
+                if (Vector3.Distance(position, enemy.GetPosition()) <= maxRange) {
+                    if (closest == null) {
                         closest = enemy;
+                    } else {
+                        if (Vector3.Distance(position, enemy.GetPosition()) < Vector3.Distance(position, closest.GetPosition())) {
+                            closest = enemy;
+                        }
                     }
                 }
             }
@@ -36,7 +38,7 @@ public class Enemy : MonoBehaviour
         return enemyHandler;
     }
 
-    private const float SPEED = 30f;
+    private const float SPEED = 40f;
     private State state;
     private Vector3 lastMoveDir;
     private int currentPathIndex;
@@ -45,6 +47,9 @@ public class Enemy : MonoBehaviour
     private Func<IEnemyTargetable> getEnemyTarget;
     private HealthBar healthBar;
     public HealthSystem healthSystem;
+    private float health;
+    private AudioController sound;
+    //private Collider2D collider;
 
     private enum State {
         Normal,
@@ -54,15 +59,15 @@ public class Enemy : MonoBehaviour
 
     private void Awake() {
         enemyList.Add(this);
+        sound = GameObject.Find("AudioPlayer").GetComponent<AudioController>();
         SetStateNormal();
-
-        healthSystem = new HealthSystem(100);
     }
 
     private void Start() {
         Transform healthBarTransform = Instantiate(GameAssets.i.healthBarPrefab, new Vector3(transform.position.x, transform.position.y + 10f), Quaternion.identity);
         healthBar = healthBarTransform.GetComponent<HealthBar>();
         healthBar.transform.parent = transform;
+        healthSystem = new HealthSystem(health);
 
         healthBar.Setup(healthSystem);
     }
@@ -150,6 +155,12 @@ public class Enemy : MonoBehaviour
         return transform.position;
     }
 
+    public void ReachedTarget() {
+        Destroy(gameObject);
+    }
 
+    public void SetHealth(float health) {
+        this.health = health;
+    }
     
 }

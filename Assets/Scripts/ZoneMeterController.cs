@@ -5,7 +5,7 @@ using SpriteGlow;
 
 public class ZoneMeterController : MonoBehaviour
 {
-    private const float INCREASE_RATE = 0.0001f;
+    private const float INCREASE_RATE = 0.00005f;
     private const float DECAY_RATE = 0.00005f;
     private GameObject sprites;
     public GameObject statBar;
@@ -16,7 +16,7 @@ public class ZoneMeterController : MonoBehaviour
         Stopped
     }
     public STATE state;
-    public float maxValue, currentValue, thresholdValue;
+    public float maxValue, currentValue, thresholdValue, damageValue, gameOverValue;
 
     private void Start() {
         statBar = transform.Find("Bar/StatBar").gameObject;
@@ -24,9 +24,11 @@ public class ZoneMeterController : MonoBehaviour
         Glow(sprites);
 
         maxValue = statBar.transform.localScale.y;
-        currentValue = 0.0f;
+        currentValue = 0.05f;
         thresholdValue = maxValue * 0.75f;
         statBar.transform.localScale = new Vector2(statBar.transform.localScale.x, currentValue);
+        damageValue = maxValue * 0.05f;
+        gameOverValue = maxValue * 0f;
 
         state = STATE.Increasing;
     }
@@ -57,7 +59,7 @@ public class ZoneMeterController : MonoBehaviour
     private void HandleIncreasing() {
         if (currentValue <= maxValue) {
             currentValue += INCREASE_RATE;
-            statBar.transform.localScale = new Vector2(statBar.transform.localScale.x, statBar.transform.localScale.y + INCREASE_RATE);
+            statBar.transform.localScale = new Vector2(statBar.transform.localScale.x, currentValue);
         } else {
             state = STATE.Stopped;
         }
@@ -66,7 +68,7 @@ public class ZoneMeterController : MonoBehaviour
     private void HandleDecreasing() {
         if (currentValue >= 0) {
             currentValue -= DECAY_RATE;
-            statBar.transform.localScale = new Vector2(statBar.transform.localScale.x, statBar.transform.localScale.y - DECAY_RATE);
+            statBar.transform.localScale = new Vector2(statBar.transform.localScale.x, currentValue);
         } else {
             state = STATE.Stopped;
         }
@@ -90,5 +92,14 @@ public class ZoneMeterController : MonoBehaviour
 
     public float GetThresholdValue() {
         return thresholdValue;
+    }
+
+    public float GetGameOverValue() {
+        return gameOverValue;
+    }
+
+    public void Damage() {
+        currentValue -= damageValue;
+        statBar.transform.localScale = new Vector2(statBar.transform.localScale.x, currentValue);
     }
 }

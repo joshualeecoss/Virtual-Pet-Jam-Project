@@ -5,6 +5,7 @@ using UnityEngine.UIElements;
 using UnityEngine;
 using TMPro;
 using CodeMonkey.Utils;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -14,10 +15,15 @@ public class GameManager : MonoBehaviour
     private const int GRID_WIDTH = 8;
     private const int GRID_HEIGHT = 11;
     private const float TOWER_PRICE = 10f;
+    private const float ENEMY_INITIAL_HEALTH = 100f;
+    private const int ENEMY_INITIAL_WAVE_SIZE = 6;
+    private const float ENEMY_HEALTH_INCREASE = 30f;
     private bool loaded;
     private float gridCellSize = 24f;
+    public bool isGameActive;
 
     private Grid<GridNode> grid;
+    private HitTrigger hitCollider;
 
     private StatMeterController hungerMeter;
     private StatMeterController sleepMeter;
@@ -26,20 +32,37 @@ public class GameManager : MonoBehaviour
 
     private ZoneMeterController zoneMeter;
     private Transform tower;
+    private VirtualPetController virtualPet;
     private List<Transform> towerList;
+    private List<Enemy> enemyList;
+    public GameObject gameOverPanel;
+    public GameObject pausePanel;
+
+    public float enemyHealth;
+    private int waveSize;
 
     private TextMeshProUGUI cashText;
     private TextMeshProUGUI hungerPrice, sleepPrice, staminaPrice, thirstPrice;
     private TextMeshProUGUI foodPrice, pillowPrice, coffeePrice, waterPrice;
     private float hungerPriceValue = 10f, sleepPriceValue = 10f, staminaPriceValue = 10f, thirstPriceValue = 10f;
     private float foodPriceValue = 1f, pillowPriceValue = 1f, coffeePriceValue = 1f, waterPriceValue = 1f;
+    private AudioController sound;
 
     private void Awake() {
         grid = new Grid<GridNode>(8, 11, gridCellSize, new Vector3(262, 24), (Grid<GridNode> g, int x, int y) => new GridNode(g, x, y));
         towerList = new List<Transform>();
+        enemyList = new List<Enemy>();
+        hitCollider = GameObject.Find("HitTrigger").GetComponent<HitTrigger>();
+        virtualPet = GameObject.Find("VirtualPet").GetComponent<VirtualPetController>();
+        sound = GameObject.Find("AudioPlayer").GetComponent<AudioController>();
     }
 
     private void Start() {
+        // sound.BGMusic();
+        isGameActive = true;
+        Time.timeScale = 1;
+        enemyHealth = ENEMY_INITIAL_HEALTH;
+        waveSize = ENEMY_INITIAL_WAVE_SIZE;
         cashText = GameObject.Find("CASH").GetComponent<TextMeshProUGUI>();
         hungerPrice = GameObject.Find("HungerPrice").GetComponent<TextMeshProUGUI>();
         sleepPrice = GameObject.Find("SleepPrice").GetComponent<TextMeshProUGUI>();
@@ -57,20 +80,43 @@ public class GameManager : MonoBehaviour
         zoneMeter = GameObject.Find("Meters/TheZoneMeter").GetComponent<ZoneMeterController>();
 
         loaded = false;
-        cash = 500f;
+        cash = 50f;
         SetText();
         BlackOutPath();
+        StartCoroutine(WaveTimeout());
     }
 
     private void Update() {
         SetText();
         ZoneCheck();
         ZonePower();
+        EmptyMeterCheck();
 
-        if (Input.GetKeyDown(KeyCode.B)) {
-            SpawnEnemyWave_1();
-            Debug.Log("B");
+        foreach (Enemy enemy in enemyList.ToArray()) {
+            if (enemy.IsDead()) {
+                sound.Die();
+                enemyList.Remove(enemy);
+                cash += UnityEngine.Random.Range(1, 3);
+                if (enemyList.Count == 0) {
+                    StartCoroutine(WaveTimeout());
+                }
+            }
         }
+
+        if (hitCollider.GetHit()) {
+            virtualPet.Hit();
+            sound.Hit();
+            if (hitCollider.GetEnemy() != null) {
+                enemyList.Remove(hitCollider.GetEnemy());
+                hitCollider.GetEnemy().ReachedTarget();
+                zoneMeter.Damage();
+            }
+            hitCollider.SetHit(false);
+            if (enemyList.Count == 0) {
+                StartCoroutine(WaveTimeout());
+            }
+        }
+
 
         if (Input.GetMouseButtonDown(0)) {
             GridNode node = grid.GetGridObject(UtilsClass.GetMouseWorldPosition());
@@ -78,6 +124,7 @@ public class GameManager : MonoBehaviour
                 if (node.isItEmpty() == false) {
                     return;
                 } else {
+                    sound.SetTower();
                     SpawnTower();
                     node.SetIsEmpty(false);
                     loaded = false;
@@ -85,12 +132,19 @@ public class GameManager : MonoBehaviour
             } 
         }
 
-        // TextMesh[,] debugTextArray = new TextMesh[GRID_WIDTH, GRID_HEIGHT];
-        // for (int i = 0; i < GRID_WIDTH; i++) {
-        //     for (int j = 0; j < GRID_HEIGHT; j++) {
-        //         debugTextArray[i, j] = UtilsClass.CreateWorldText(grid.GetGridObject(i, j).isItWalkable().ToString(), null, grid.GetWorldPosition(i, j) + new Vector3(gridCellSize, gridCellSize) * 0.5f, 80, Color.white, TextAnchor.MiddleCenter);
-        //     }
-        // }
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            if (isGameActive) {
+                PauseGame();
+            } else {
+                ResumeGame();
+            }
+        }
+
+
+        if (zoneMeter.GetCurrentValue() <= zoneMeter.GetGameOverValue()) {
+            GameOver();
+        }
+
     }
 
     private void ZoneCheck() {
@@ -128,6 +182,7 @@ public class GameManager : MonoBehaviour
     }
 
     public void FoodButtonClicked() {
+        sound.Click();
         if (cash >= foodPriceValue) {
             cash -= foodPriceValue;
             foodPriceValue += PRICE_INCREASE;
@@ -138,6 +193,7 @@ public class GameManager : MonoBehaviour
     }
 
     public void PillowButtonClicked() {
+        sound.Click();
         if (cash >= pillowPriceValue) {
             cash -= pillowPriceValue;
             pillowPriceValue += PRICE_INCREASE;
@@ -148,6 +204,7 @@ public class GameManager : MonoBehaviour
     }
 
     public void CoffeeButtonClicked() {
+        sound.Click();
         if (cash >= coffeePriceValue) {
             cash -= coffeePriceValue;
             coffeePriceValue += PRICE_INCREASE;
@@ -158,6 +215,7 @@ public class GameManager : MonoBehaviour
     }
 
     public void WaterButtonClicked() {
+        sound.Click();
         if (cash >= waterPriceValue) {
             cash -= waterPriceValue;
             waterPriceValue += PRICE_INCREASE;
@@ -168,19 +226,42 @@ public class GameManager : MonoBehaviour
     }
 
     public void HungerButtonClicked() {
-        ReadyTower(TowerController.towerType.Hunger);
+        sound.Click();
+        if (cash >= hungerPriceValue){
+            ReadyTower(TowerController.towerType.Hunger);
+        }
     }
 
     public void SleepButtonClicked() {
-        ReadyTower(TowerController.towerType.Sleep);
+        sound.Click();
+        if (cash >= sleepPriceValue) {
+            ReadyTower(TowerController.towerType.Sleep);
+        }
+
     }
 
     public void StaminaButtonClicked() {
-        ReadyTower(TowerController.towerType.Stamina);
+        sound.Click();
+        if (cash >= staminaPriceValue) {
+            ReadyTower(TowerController.towerType.Stamina);
+        }
     }
 
     public void ThirstButtonClicked() {
-        ReadyTower(TowerController.towerType.Thirst);
+        sound.Click();
+        if (cash >= thirstPriceValue) {
+            ReadyTower(TowerController.towerType.Thirst);
+        }
+    }
+
+    public void ReplayButtonClicked() {
+        sound.Click();
+        SceneManager.LoadScene("Main");
+    }
+
+    public void QuitButtonClicked() {
+        sound.Click();
+        Application.Quit();
     }
 
 
@@ -210,7 +291,41 @@ public class GameManager : MonoBehaviour
             cash -= TOWER_PRICE; 
             tower = null;  
         }
- 
+    }
+
+    private void EmptyMeterCheck() {
+        if (hungerMeter.GetCurrentValue() <= 0) {
+            foreach (Transform tower in towerList) {
+                if (tower.GetComponent<TowerController>().GetTowerType() == TowerController.towerType.Hunger) {
+                    tower.GetComponent<TowerController>().NoDamage();
+                    tower.GetComponent<Animator>().speed = 0f;
+                }
+            }
+        }
+        if (sleepMeter.GetCurrentValue() <= 0) {
+            foreach (Transform tower in towerList) {
+                if (tower.GetComponent<TowerController>().GetTowerType() == TowerController.towerType.Sleep) {
+                    tower.GetComponent<TowerController>().NoDamage();
+                    tower.GetComponent<Animator>().speed = 0f;
+                }
+            }
+        }
+        if (staminaMeter.GetCurrentValue() <= 0) {
+            foreach (Transform tower in towerList) {
+                if (tower.GetComponent<TowerController>().GetTowerType() == TowerController.towerType.Stamina) {
+                    tower.GetComponent<TowerController>().NoDamage();
+                    tower.GetComponent<Animator>().speed = 0f;
+                }
+            }
+        }
+        if (thirstMeter.GetCurrentValue() <= 0) {
+            foreach (Transform tower in towerList) {
+                if (tower.GetComponent<TowerController>().GetTowerType() == TowerController.towerType.Thirst) {
+                    tower.GetComponent<TowerController>().NoDamage();
+                    tower.GetComponent<Animator>().speed = 0f;
+                }
+            }
+        }
     }
 
     private Vector3 ValidateWorldGridPosition(Vector3 position) {
@@ -218,17 +333,15 @@ public class GameManager : MonoBehaviour
         return grid.GetWorldPosition(x, y);
     }
 
-    private void SpawnEnemyWave_1() {
+    private void SpawnEnemyWave() {
         float spawnTime = 0f;
         float timePerSpawn = .6f;
 
-        FunctionTimer.Create(() => SpawnEnemy(), spawnTime); spawnTime += timePerSpawn;
-        FunctionTimer.Create(() => SpawnEnemy(), spawnTime); spawnTime += timePerSpawn;
-        FunctionTimer.Create(() => SpawnEnemy(), spawnTime); spawnTime += timePerSpawn;
-        FunctionTimer.Create(() => SpawnEnemy(), spawnTime); spawnTime += timePerSpawn;
-        FunctionTimer.Create(() => SpawnEnemy(), spawnTime); spawnTime += timePerSpawn;
-        FunctionTimer.Create(() => SpawnEnemy(), spawnTime); spawnTime += timePerSpawn;
-        FunctionTimer.Create(() => SpawnEnemy(), spawnTime); spawnTime += timePerSpawn;
+        for (int i = 0; i < waveSize; i++) {
+            FunctionTimer.Create(() => SpawnEnemy(), spawnTime); spawnTime += timePerSpawn;
+        }
+        enemyHealth += 10;
+        waveSize += UnityEngine.Random.Range(1, 3);
     }
     private void SpawnEnemy() {
         Vector3 spawnPosition = ValidateWorldGridPosition(new Vector3(465f, 252f)) + new Vector3(1, 1, 0) * grid.GetCellSize() * .5f;
@@ -236,6 +349,9 @@ public class GameManager : MonoBehaviour
 
         Enemy enemy = Enemy.Create(spawnPosition);
         enemy.SetPathVectorList(waypointPositionList);
+        enemy.SetHealth(enemyHealth);
+        enemyList.Add(enemy);
+
     }
 
     private List<Vector3> WaypointPositions() {
@@ -301,6 +417,28 @@ public class GameManager : MonoBehaviour
             grid.GetGridObject(node).SetIsEmpty(false);
         }
 
+    }
+
+    public void GameOver() {
+        Time.timeScale = 0;
+        gameOverPanel.SetActive(true);
+    }
+
+    public void PauseGame() {
+        isGameActive = false;
+        Time.timeScale = 0;
+        pausePanel.SetActive(true);
+    }
+
+    public void ResumeGame() {
+        isGameActive = true;
+        Time.timeScale = 1;
+        pausePanel.SetActive(false);
+    }
+
+    private IEnumerator WaveTimeout() {
+        yield return new WaitForSeconds(5f);
+        SpawnEnemyWave();
     }
 
 

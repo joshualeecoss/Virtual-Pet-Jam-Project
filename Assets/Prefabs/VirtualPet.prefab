@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 193249669699200957}
   - component: {fileID: 949094410363791845}
   - component: {fileID: 6149641132549811331}
+  - component: {fileID: 3323410655999658936}
   m_Layer: 0
   m_Name: VirtualPet
   m_TagString: Untagged
@@ -121,3 +122,16 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &3323410655999658936
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8821960157941836169}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8567d32007998e544989ab84a2e2f0e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  state: 0
